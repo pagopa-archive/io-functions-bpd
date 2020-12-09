@@ -6,35 +6,49 @@ import {
   withRequestMiddlewares,
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 import {
-  IResponseErrorNotFound,
+  IResponse,
+  IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { CIDR } from "italia-ts-commons/lib/strings";
+import { FederatedUser as BPDUser } from "../generated/definitions/FederatedUser";
+import { User } from "../types/user";
+import { withCheckIp } from "../utils/checkIp";
+import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 
 type IHttpHandler = (
-  context: Context
-) => Promise<
-  | IResponseSuccessJson<{
-      headers: any;
-    }>
-  | IResponseErrorNotFound
->;
+  context: Context,
+  user: User
+) => Promise<IResponseSuccessJson<BPDUser> | IResponseErrorValidation>;
 
-export function HttpHandler(): IHttpHandler {
-  return async (ctx) => {
-    return ResponseSuccessJson({
-      headers: ctx.req?.headers
-    });
+export function BPDGetUserHandler(): IHttpHandler {
+  return async (_, user) => {
+    return BPDUser.decode({
+      family_name: user.family_name,
+      fiscal_code: user.fiscal_code,
+      name: user.name
+    }).fold<IResponseSuccessJson<BPDUser> | IResponseErrorValidation>(
+      err => ResponseErrorValidation("Invalid user", readableReport(err)),
+      bpdUser => ResponseSuccessJson(bpdUser)
+    );
   };
 }
 
-export function HttpCtrl(): express.RequestHandler {
-  const handler = HttpHandler();
+export declare type RequestHandler<R> = (
+  request: express.Request
+) => Promise<IResponse<R>>;
+
+export function BPDGetUser(range: readonly CIDR[]): express.RequestHandler {
+  const handler = BPDGetUserHandler();
 
   const middlewaresWrap = withRequestMiddlewares(
-    ContextMiddleware()
+    ContextMiddleware(),
+    RequiredExpressUserMiddleware(User)
   );
 
-  return wrapRequestHandler(middlewaresWrap(handler));
+  return withCheckIp(range)(wrapRequestHandler(middlewaresWrap(handler)));
 }

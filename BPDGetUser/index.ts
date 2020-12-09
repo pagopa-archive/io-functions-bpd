@@ -2,18 +2,20 @@ import * as express from "express";
 import * as winston from "winston";
 
 import { Context } from "@azure/functions";
-import {
-  SERVICE_COLLECTION_NAME,
-  ServiceModel
-} from "io-functions-commons/dist/src/models/service";
 import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
+import * as passport from "passport";
 import { getConfigOrThrow } from "../utils/config";
-import { cosmosdbClient } from "../utils/cosmosdb";
-import { HttpCtrl } from "./handler";
+import {
+  createClusterRedisClient,
+  createSimpleRedisClient
+} from "../utils/redis";
+import SessionStorage from "../utils/sessionStorage";
+import bearerBPDTokenStrategy from "../utils/strategy";
+import { BPDGetUser } from "./handler";
 
 //
 //  CosmosDB initialization
@@ -28,12 +30,26 @@ const contextTransport = new AzureContextTransport(() => logger, {
 });
 winston.add(contextTransport);
 
+const REDIS_CLIENT = !config.isProduction
+  ? createSimpleRedisClient(config.REDIS_URL)
+  : createClusterRedisClient(
+      config.REDIS_URL,
+      config.REDIS_PASSWORD,
+      config.REDIS_PORT
+    );
+const sessionStorage = new SessionStorage(REDIS_CLIENT);
+
 // Setup Express
 const app = express();
 secureExpressApp(app);
 
+passport.use("bearer.bpd", bearerBPDTokenStrategy(sessionStorage));
+const bpdBearerAuth = passport.authenticate("bearer.bpd", {
+  session: false
+});
+
 // Add express route
-app.get("/v1/user", HttpCtrl());
+app.get("/v1/user", bpdBearerAuth, BPDGetUser(config.allowBPDIPSourceRange));
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
