@@ -18,6 +18,7 @@ type InfoHandler = () => Promise<
 
 export function InfoHandler(): InfoHandler {
   return async () =>
+    // TODO: Add health check step
     ResponseSuccessJson({
       name: packageJson.name,
       version: packageJson.version
