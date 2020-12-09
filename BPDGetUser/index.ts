@@ -49,7 +49,7 @@ const bpdBearerAuth = passport.authenticate("bearer.bpd", {
 });
 
 // Add express route
-app.get("/v1/user", bpdBearerAuth, BPDGetUser(config.allowBPDIPSourceRange));
+app.get("/api/v1/user", bpdBearerAuth, BPDGetUser());
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 

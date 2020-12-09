@@ -14,10 +14,8 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { CIDR } from "italia-ts-commons/lib/strings";
 import { FederatedUser as BPDUser } from "../generated/definitions/FederatedUser";
 import { User } from "../types/user";
-import { withCheckIp } from "../utils/checkIp";
 import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 
 type IHttpHandler = (
@@ -42,7 +40,7 @@ export declare type RequestHandler<R> = (
   request: express.Request
 ) => Promise<IResponse<R>>;
 
-export function BPDGetUser(range: readonly CIDR[]): express.RequestHandler {
+export function BPDGetUser(): express.RequestHandler {
   const handler = BPDGetUserHandler();
 
   const middlewaresWrap = withRequestMiddlewares(
@@ -50,5 +48,5 @@ export function BPDGetUser(range: readonly CIDR[]): express.RequestHandler {
     RequiredExpressUserMiddleware(User)
   );
 
-  return withCheckIp(range)(wrapRequestHandler(middlewaresWrap(handler)));
+  return wrapRequestHandler(middlewaresWrap(handler));
 }

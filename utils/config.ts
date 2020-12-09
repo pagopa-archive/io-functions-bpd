@@ -26,7 +26,6 @@ export const IConfig = t.intersection([
   t.interface({
     AzureWebJobsStorage: NonEmptyString,
     QueueStorageConnection: NonEmptyString,
-    allowBPDIPSourceRange: t.array(CIDR),
     isProduction: t.boolean
   }),
   RedisParams
@@ -35,10 +34,6 @@ export const IConfig = t.intersection([
 // No need to re-evaluate this object for each call
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
-  allowBPDIPSourceRange: process.env.ALLOW_BPD_IP_SOURCE_RANGE?.split(",")
-    .map(c => c.trim())
-    // if we read a plain IP then append '/32'
-    .map(c => (c.indexOf("/") !== -1 ? c : c + "/32")),
   isProduction: process.env.NODE_ENV === "production"
 });
 
