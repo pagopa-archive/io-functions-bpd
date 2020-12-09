@@ -1,11 +1,28 @@
-/* tslint:disable: no-any */
+import { CIDR } from "italia-ts-commons/lib/strings";
+import { BPDGetUser } from "../handler";
+import { Response, Request } from "express";
 
-import { HttpHandler } from "../handler";
+const authorizedIp = "1.1.1.1";
 
-describe("HttpCtrl", () => {
+const mockStatus = jest.fn().mockImplementation(() => ({
+  send: jest.fn()
+}));
+const mockRes = ({
+  status: mockStatus,
+  send: jest.fn()
+} as unknown) as Response;
+
+const mockReq = ({
+  headers: {
+    "x-forwarded-for": authorizedIp
+  }
+} as unknown) as Request;
+
+describe("BPDGetUser", () => {
   it("should return a string when the query parameter is provided", async () => {
-    const httpHandler = HttpHandler();
-    const response = await httpHandler({} as any, {} as any, "param");
-    expect(response.kind).toBe("IResponseSuccessJson");
+    const expectedRange = "1.2.3.4" as CIDR;
+    const httpHandler = BPDGetUser([expectedRange]);
+    httpHandler(mockReq, mockRes, () => {});
+    expect(mockRes.status).toBeCalledWith(401);
   });
 });
