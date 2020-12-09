@@ -10,40 +10,70 @@ info:
   description: >
     Documentation of the IO Function API here.
 host: api.cd.italia.it
-basePath: "/template"
+basePath: "/"
 schemes:
   - https
+security:
+  - Bearer: []
 paths:
-  "/echo/{input}":
-    parameters:
-      - name: input
-        in: path
-        type: string
-        required: true
-        description: test input.
+  "/v1/user":
+    x-swagger-router-controller: SSOController
     get:
-      operationId: echo
-      summary: Echo API
-      description: Some API description here.
+      operationId: getUserForBPD
+      summary: Get user's data
+      description: Returns the user data needed by BPD backend.
       responses:
         "200":
           description: Found.
           schema:
-            "$ref": "#/definitions/Input"
+            $ref: "#/definitions/FederatedUser"
           examples:
             application/json:
-              id: "10000AAAA"
-              output: "hello world !"
+              name: "Name"
+              family_name: "Surname"
+              fiscal_code: "AAABBB01C02D123Z"
         "401":
-          description: Unauthorized
-        "404":
-          description: Not found.
-      parameters: []
+          description: Token null or expired.
+        "500":
+          description: There was an error in retrieving the user data.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
-  Input:
+  LimitedFederatedUser:
+    title: Federated user
+    description: User data needed by federated applications.
     type: object
     properties:
-      id:
-        type: string
-      output:
-        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+    required:
+      - fiscal_code
+  FederatedUser:
+    title: Federated user
+    description: User data needed by federated applications.
+    allOf:
+      - type: object
+        properties:
+          name:
+            type: string
+          family_name:
+            type: string
+        required:
+          - name
+          - family_name
+      - $ref: "#/definitions/LimitedFederatedUser"
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/ProblemJson"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
+responses: {}
+parameters: {}
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
