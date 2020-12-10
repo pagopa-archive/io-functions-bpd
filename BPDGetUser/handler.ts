@@ -14,7 +14,7 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FederatedUser as BPDUser } from "../generated/definitions/FederatedUser";
+import { BPDUser } from "../generated/definitions/BPDUser";
 import { User } from "../types/user";
 import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 
