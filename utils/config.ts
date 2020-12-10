@@ -7,7 +7,7 @@
 
 import * as t from "io-ts";
 import { readableReport } from "italia-ts-commons/lib/reporters";
-import { CIDR, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 export const RedisParams = t.intersection([
   t.interface({

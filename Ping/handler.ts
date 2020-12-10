@@ -5,11 +5,6 @@ import {
   ResponseSuccessAccepted
 } from "italia-ts-commons/lib/responses";
 
-interface IPing {
-  name: string;
-  version: string;
-}
-
 type PingHandler = () => Promise<IResponseSuccessAccepted>;
 
 export function PingHandler(): PingHandler {
