@@ -7,7 +7,7 @@
       "name": "req",
       "route": "v1/ping",
       "methods": [
-        "get"
+        "head"
       ]
     },
     {

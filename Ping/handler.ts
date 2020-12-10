@@ -1,24 +1,19 @@
 import * as express from "express";
 import { wrapRequestHandler } from "io-functions-commons/dist/src/utils/request_middleware";
 import {
-  IResponseSuccessJson,
-  ResponseSuccessJson
+  IResponseSuccessAccepted,
+  ResponseSuccessAccepted
 } from "italia-ts-commons/lib/responses";
-import * as packageJson from "../package.json";
 
 interface IPing {
   name: string;
   version: string;
 }
 
-type PingHandler = () => Promise<IResponseSuccessJson<IPing>>;
+type PingHandler = () => Promise<IResponseSuccessAccepted>;
 
 export function PingHandler(): PingHandler {
-  return async () =>
-    ResponseSuccessJson({
-      name: packageJson.name,
-      version: packageJson.version
-    });
+  return async () => ResponseSuccessAccepted();
 }
 
 export function Ping(): express.RequestHandler {
