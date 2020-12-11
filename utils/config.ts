@@ -25,7 +25,6 @@ export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.interface({
     AzureWebJobsStorage: NonEmptyString,
-    QueueStorageConnection: NonEmptyString,
     isProduction: t.boolean
   }),
   RedisParams
