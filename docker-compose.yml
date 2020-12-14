@@ -61,15 +61,16 @@ services:
     networks:
       - io-fn
 
-  cosmosdb:
-    image: cosmosdb
-    env_file:
-      - .env
-    build:
-      context: ./
-      dockerfile: docker/cosmosdb/Dockerfile
+
+  redis:
+    container_name: redis-fn-bpd
+    image: wodby/redis:3.2-2.1.5
     ports:
-      - ${COSMOSDB_PORT}:3000
+      - "6379:6379"
+    environment:
+      REDIS_TIMEOUT: 300
+      REDIS_TCP_KEEPALIVE: 60
+      REDIS_MAXMEMORY: 182m
     networks:
       - io-fn
 

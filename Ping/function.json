@@ -5,9 +5,9 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route": "v1/info",
+      "route": "v1/ping",
       "methods": [
-        "get"
+        "head"
       ]
     },
     {
@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/Info/index.js"
+  "scriptFile": "../dist/Ping/index.js"
 }
